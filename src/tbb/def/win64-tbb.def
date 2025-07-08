@@ -18,6 +18,7 @@ EXPORTS
 
 ; Assertions (assert.cpp)
 ?assertion_failure@r1@detail@tbb@@YAXPEBDH00@Z
+?set_assertion_handler@r1@detail@tbb@@YA?AV?$function@$$A6AXPEBDH00@Z@std@@V45@@Z
 
 ; ITT (tbb_profiling.cpp)
 ?call_itt_notify@r1@detail@tbb@@YAXHPEAX@Z

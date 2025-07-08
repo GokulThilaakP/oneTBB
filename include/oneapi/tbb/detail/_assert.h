@@ -19,6 +19,8 @@
 
 #include "_config.h"
 
+#include <functional>
+
 #if __TBBMALLOC_BUILD
 namespace rml { namespace internal {
 #else
@@ -32,11 +34,23 @@ namespace r1 {
   Otherwise call the assertion handler. */
 TBB_EXPORT void __TBB_EXPORTED_FUNC assertion_failure(const char *location, int line,
                                                       const char *expression, const char *comment);
+
+//using assertion_handler_type = decltype(&assertion_failure);
+using assertion_handler_type = std::function<decltype(assertion_failure)>;
+
+//! Set assertion handler and return previous value of it.
+TBB_EXPORT assertion_handler_type __TBB_EXPORTED_FUNC set_assertion_handler(assertion_handler_type new_handler);
+
 #if __TBBMALLOC_BUILD
 }} // namespaces rml::internal
 #else
 } // namespace r1
 } // namespace detail
+
+inline namespace v1 {
+using detail::r1::set_assertion_handler;
+} // namespace v1
+
 } // namespace tbb
 #endif
 

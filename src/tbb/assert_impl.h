@@ -57,6 +57,14 @@ static void assertion_failure_impl(const char* location, int line, const char* e
     }
 }
 
+static assertion_handler_type assertion_handler;
+
+assertion_handler_type __TBB_EXPORTED_FUNC set_assertion_handler(assertion_handler_type new_handler) {
+    assertion_handler_type old_handler = assertion_handler;
+    assertion_handler = new_handler;
+    return old_handler;
+}
+
 // Do not move the definition into the assertion_failure function because it will require "magic statics".
 // It will bring a dependency on C++ runtime on some platforms while assert_impl.h is reused in tbbmalloc 
 // that should not depend on C++ runtime
@@ -70,7 +78,11 @@ void __TBB_EXPORTED_FUNC assertion_failure(const char* location, int line, const
 #endif
     // We cannot use std::call_once because it brings a dependency on C++ runtime on some platforms 
     // while assert_impl.h is reused in tbbmalloc that should not depend on C++ runtime
-    atomic_do_once([&](){ assertion_failure_impl(location, line, expression, comment); }, assertion_state);
+    if (assertion_handler) {
+        atomic_do_once([&](){ assertion_handler(location, line, expression, comment); }, assertion_state);
+    } else {
+        atomic_do_once([&](){ assertion_failure_impl(location, line, expression, comment); }, assertion_state);
+    }
 #if __TBB_MSVC_UNREACHABLE_CODE_IGNORED
     #pragma warning (pop)
 #endif
